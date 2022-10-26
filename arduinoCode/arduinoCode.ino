@@ -5,10 +5,10 @@ SoftwareSerial ESPserial(2, 3); // RX | TX
 //GLOBAL VARIABLES
 
 // plant stuff
-char plantType[100] = "Tropical";
+String plantType = "Arid";
 //Variable setup for moisture sensors
-const int AirValue = 3550;
-const int WaterValue = 310;
+const int AirValue = 567;
+const int WaterValue = 295;
 int soilMoistureValue = 0;
 int soilmoisturepercent = 0;
 Generic_LM75 temperature;
@@ -32,7 +32,15 @@ void setup() {
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
- WaterPlant();
+ double temp;
+ int soilMoisture;
+ 
+ soilMoisture = GetSM();
+ temp = GetTemp();
+ CheckPlantSM();
+ 
+ //Test stuff
+  SendData(soilMoisture, temp);
 
   delay(2000);
  
@@ -46,11 +54,11 @@ void loop() {
     digitalWrite(in1, HIGH);
     digitalWrite(in2, LOW);
     analogWrite(enA, 150); //Set speed: possible range 0 to 255
-    delay(1000); //time on
+    delay(350); //time on
     // change motor dir
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
-    delay(5000);
+    delay(004000);
     // Now turn off motors
     digitalWrite(in1, LOW);
     digitalWrite(in2, LOW);
@@ -90,17 +98,22 @@ if (soilmoisturepercent >= 100)
 // function that checks the plant type and the soil mositure to see if we need to water the plant.
 void CheckPlantSM()
 {
-  if (plantType == "Tropical" && soilmoisturepercent < 100)
+  GetSM();
+  Serial.println("Soil moisture %");
+  Serial.println(soilmoisturepercent);
+  Serial.println(plantType);
+  if (plantType == "Tropical" && soilmoisturepercent < 80)
   {
-    // WaterPlant();  
+    WaterPlant();  
   }
-  else if (plantType == "Temperate" && soilmoisturepercent < 50)
+  else if (plantType.equals("Temperate") && soilmoisturepercent < 50)
   {
-    // WaterPlant();  
+    WaterPlant();  
   }
-  else if (plantType == "Arid" && soilmoisturepercent < 0)
+  else if (plantType.equals("Arid") && soilmoisturepercent < 30)
   {
-    // WaterPlant();  
+    Serial.println("We are watering the Arid plant!!!!!!");
+    WaterPlant();  
   }
 }
 
