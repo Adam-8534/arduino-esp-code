@@ -32,14 +32,7 @@ void setup() {
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
- double temp;
- int soilMoisture;
- 
- soilMoisture = GetSM();
- temp = GetTemp();
- 
- //Test stuff
-  SendData(soilMoisture, temp);
+ WaterPlant();
 
   delay(2000);
  
@@ -49,41 +42,20 @@ void loop() {
   //PLANT FUNCTION
   void WaterPlant() {
     // Turn on Motor
+    Serial.println("We are in the water plant function!");
     digitalWrite(in1, HIGH);
     digitalWrite(in2, LOW);
-    analogWrite(enA, 255); //Set speed: possible range 0 to 255
-    delay(3000); //time on
+    analogWrite(enA, 150); //Set speed: possible range 0 to 255
+    delay(1000); //time on
+    // change motor dir
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    delay(5000);
     // Now turn off motors
     digitalWrite(in1, LOW);
     digitalWrite(in2, LOW);
-    delay(2500);
+    delay(5000);
   }
-///////////////////////////////////////////////////////////////////////////
-//PROTOTYPE TEMP SENSOR CODE TO INTEGRATE LATER
-/*
-  void loop() {
-  Serial.print("Temperature = ");
-  Serial.print(temperature.readTemperatureC());
-  Serial.println(" C");
-  soilMoistureValue = analogRead(A0);  //put Sensor insert into soil
-  Serial.println(soilMoistureValue);
-  soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
-  if(soilmoisturepercent >= 100)
-  {
-  Serial.println("100 %");
-  }
-  else if(soilmoisturepercent <=0)
-  {
-  Serial.println("0 %");
-  }
-  else if(soilmoisturepercent >0 && soilmoisturepercent < 100)
-  {
-  Serial.print(soilmoisturepercent);
-  Serial.println("%");
-
-  }
-  delay(2500);
-  } */
 ///////////////////////////////////////////////////////////////////////////
 void SendData(int SMS, double temp)
 {
