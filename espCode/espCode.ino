@@ -32,6 +32,7 @@ void setup() {
   }
 
   WiFi.mode(WIFI_STA);
+  // WiFiMulti.addAP("Verizon-SM-G970U-909c", "frankieo");
   WiFiMulti.addAP("Verizon-SM-G970U-909c", "frankieo");
 }
 
@@ -76,8 +77,8 @@ void postRequest() {
     }
   }
 
-  Serial.println("Wait 10s before next round...");
-  delay(10000);
+  Serial.println("Wait 3s before next round...");
+  delay(3000);
 }
 
 void loop(){

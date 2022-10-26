@@ -32,6 +32,7 @@ void setup() {
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
+  delay(5000);
  double temp;
  int soilMoisture;
  
@@ -50,15 +51,14 @@ void loop() {
   //PLANT FUNCTION
   void WaterPlant() {
     // Turn on Motor
-    Serial.println("We are in the water plant function!");
     digitalWrite(in1, HIGH);
     digitalWrite(in2, LOW);
-    analogWrite(enA, 150); //Set speed: possible range 0 to 255
-    delay(350); //time on
+    analogWrite(enA, 255); //Set speed: possible range 0 to 255
+    delay(1000); //time on
     // change motor dir
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
-    delay(004000);
+    delay(2000);
     // Now turn off motors
     digitalWrite(in1, LOW);
     digitalWrite(in2, LOW);
@@ -70,7 +70,9 @@ void SendData(int SMS, double temp)
   String data = String(SMS) + "/" + String(temp);
   // String stringTemp = "T" + (int)temp;
   ESPserial.print(data);
-  Serial.println(data);
+  // Serial.println(data);
+  Serial.println("Moisture Percentage: " + String(SMS) + "%");
+  Serial.println("Temperature: " + String(temp) + " C");
   delay(1000);
   // ESPserial.write(temp);
   // Serial.println(temp);
@@ -99,21 +101,21 @@ if (soilmoisturepercent >= 100)
 void CheckPlantSM()
 {
   GetSM();
-  Serial.println("Soil moisture %");
-  Serial.println(soilmoisturepercent);
-  Serial.println(plantType);
+  // Serial.println("Soil moisture %");
+  // Serial.println(soilmoisturepercent);
+  // Serial.println(plantType);
   if (plantType == "Tropical" && soilmoisturepercent < 80)
   {
-    WaterPlant();  
+    WaterPlant();
   }
   else if (plantType.equals("Temperate") && soilmoisturepercent < 50)
   {
-    WaterPlant();  
+    WaterPlant();
   }
   else if (plantType.equals("Arid") && soilmoisturepercent < 30)
   {
-    Serial.println("We are watering the Arid plant!!!!!!");
-    WaterPlant();  
+    // Serial.println("We are watering the Arid plant!!!!!!");
+    WaterPlant();
   }
 }
 
