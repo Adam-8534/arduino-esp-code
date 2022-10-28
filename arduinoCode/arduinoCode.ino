@@ -1,4 +1,4 @@
-// SoftwareSerial for esp8266 - Version: Latest 
+// SoftwareSerial for esp8266 - Version: Latest change
 #include <SoftwareSerial.h> //Allows serial connection to ESP8266 to have pins changed
 #include <Temperature_LM75_Derived.h> //temperature
 SoftwareSerial ESPserial(2, 3); // RX | TX
