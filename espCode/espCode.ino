@@ -15,6 +15,7 @@ ESP8266WiFiMulti WiFiMulti;
 String plant_id = "0";
 int temp_value = 0;
 int moisture_value = 0;
+String plant_type = "none";
 
 void setup() {
 
@@ -26,7 +27,7 @@ void setup() {
   Serial.println();
 
   for (uint8_t t = 4; t > 0; t--) {
-    Serial.printf("[SETUP] WAIT %d...\n", t);
+//    Serial.printf("[SETUP] WAIT %d...\n", t);
     Serial.flush();
     delay(1000);
   }
@@ -48,25 +49,25 @@ void postRequest() {
 
     HTTPClient https;
 
-    Serial.print("[HTTPS] begin...\n");
+//    Serial.print("[HTTPS] begin...\n");
     if (https.begin(*client, "https://leafit.vercel.app/api/sendSensorData")) {  // HTTPS
           https.addHeader("Content-Type", "application/json");
 
-      Serial.print("[HTTPS] GET...\n");
+//      Serial.print("[HTTPS] GET...\n");
       String reqData = "{\"plant_id\":\"" + plant_id + "\",\"temp_value\":\"" + temp_value + "\",\"moisture_value\":\"" + moisture_value + "\"}";           
       // start connection and send HTTP header
       int httpCode = https.POST(reqData);
-      Serial.println(reqData);
+//      Serial.println(reqData);
 
       // httpCode will be negative on error
       if (httpCode > 0) {
         // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTPS] POST... code: %d\n", httpCode);
+//        Serial.printf("[HTTPS] POST... code: %d\n", httpCode);
 
         // file found at server
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           String payload = https.getString();
-          Serial.println(payload);
+//          Serial.println(payload);
         }
       } else {
         Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
@@ -77,11 +78,13 @@ void postRequest() {
     }
   }
 
-  Serial.println("Wait 3s before next round...");
+//  Serial.println("Wait 3s before next round...");
   delay(3000);
 }
 
 void loop(){
+  sendPlantTypeToArduino(plant_type);
+  plant_type = "Tropical";
   Serial.flush();
   // lets get the plant id (Hard coded rn but we need to fetch that also)
   plant_id = "63115046a16d5cd929a233cc";
@@ -93,17 +96,20 @@ void loop(){
   Serial.flush();
 }
 
+void sendPlantTypeToArduino(String plant_type){
+    Serial.flush();
+    Serial.println(plant_type);
+    delay(1000);
+    Serial.flush();
+}
+
 void setSensorData() {
   if (Serial.available() > 0) {
     String combinedString = Serial.readString();
-    Serial.println(combinedString);
+//    Serial.println(combinedString);
     // lets seperate the string
     int indexOfSlash = combinedString.indexOf('/');
     moisture_value = combinedString.substring(0, indexOfSlash).toInt();
     temp_value = combinedString.substring(indexOfSlash + 1).toDouble();
-    // Serial.println("TEMP");
-    // Serial.println(temp_value);
-    // Serial.println("Moisture");
-    // Serial.println(moisture_value);
   }
 }

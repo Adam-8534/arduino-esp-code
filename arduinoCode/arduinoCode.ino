@@ -4,6 +4,10 @@
 SoftwareSerial ESPserial(2, 3); // RX | TX
 //GLOBAL VARIABLES
 
+String Temperate = "Temp";
+String Arid = "Arid";
+String Tropical = "Trop";
+
 // plant stuff
 String plantType = "Arid";
 //Variable setup for moisture sensors
@@ -32,6 +36,7 @@ void setup() {
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
+  getDataFromESP();
   delay(5000);
  double temp;
  int soilMoisture;
@@ -79,6 +84,20 @@ void SendData(int SMS, double temp)
   //Serial.print(temp);
   //delay(1000);
 }
+
+void getDataFromESP(){
+    if (ESPserial.available() > 0) {
+       String string_from_esp = ESPserial.readString();
+       String newString = string_from_esp.substring(0,4);
+       Serial.println(newString);
+       if(newString.equals(Tropical) || newString.equals(Temperate) || newString.equals(Arid)){
+          Serial.println(newString);
+          Serial.println("!!!");
+          plantType = newString;
+        } 
+    }
+
+}
 ///////////////////////////////////////////////////////////////////////////
 int GetSM()
 {
@@ -104,15 +123,15 @@ void CheckPlantSM()
   // Serial.println("Soil moisture %");
   // Serial.println(soilmoisturepercent);
   // Serial.println(plantType);
-  if (plantType == "Tropical" && soilmoisturepercent < 80)
+  if (plantType.equals(Tropical) && soilmoisturepercent < 80)
   {
     WaterPlant();
   }
-  else if (plantType.equals("Temperate") && soilmoisturepercent < 50)
+  else if (plantType.equals(Temperate) && soilmoisturepercent < 50)
   {
     WaterPlant();
   }
-  else if (plantType.equals("Arid") && soilmoisturepercent < 30)
+  else if (plantType.equals(Arid) && soilmoisturepercent < 30)
   {
     // Serial.println("We are watering the Arid plant!!!!!!");
     WaterPlant();
