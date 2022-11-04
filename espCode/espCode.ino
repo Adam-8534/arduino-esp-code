@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
@@ -16,6 +17,7 @@ String plant_id = "0";
 int temp_value = 0;
 int moisture_value = 0;
 String plant_type = "none";
+String user_id = "auth0|630523e8ea2e70160cd8bd3b";
 
 void setup() {
 
@@ -36,6 +38,78 @@ void setup() {
   // WiFiMulti.addAP("Verizon-SM-G970U-909c", "frankieo");
   WiFiMulti.addAP("Verizon-SM-G970U-909c", "frankieo");
 }
+
+void getPlantInfo() {
+  // wait for WiFi connection
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+    std::unique_ptr<BearSSL::WiFiClientSecure> client(new BearSSL::WiFiClientSecure);
+
+//    client->setFingerprint(fingerprint);
+    // Or, if you happy to ignore the SSL certificate, then use the following line instead:
+     client->setInsecure();
+
+    HTTPClient https;
+
+//    Serial.print("[HTTPS] begin...\n");
+    if (https.begin(*client, "https://leafit.vercel.app/api/plants")) {  // HTTPS
+          https.addHeader("Content-Type", "application/json");
+
+//      Serial.print("[HTTPS] GET...\n");
+      String reqData = "{\"user_id\":\"" + user_id +"\"}";           
+      // start connection and send HTTP header
+      int httpCode = https.POST(reqData);
+//      Serial.println(reqData);
+
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+//        Serial.printf("[HTTPS] POST... code: %d\n", httpCode);
+
+        // file found at server
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          String payload = https.getString();
+         Serial.println(payload);
+         // String input;
+        DynamicJsonDocument doc(6144);
+        DeserializationError error = deserializeJson(doc, payload);
+
+        if (error) {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.f_str());
+          return;
+        }
+
+        for (JsonObject item : doc.as<JsonArray>()) {
+
+          const char* id = item["_id"]; // "63646160c210ad0008060d4a", "6364616dc210ad0008060d4b", ...
+          const char* user_id = item["user_id"]; // "auth0|630523e8ea2e70160cd8bd3b", ...
+          const char* plantNickname = item["plantNickname"]; // "Test", "Hello", "Test", "Test", "Test", "Test", ...
+          const char* plantType = item["plantType"]; // "Temperate", "Arid", "Temperate", "Temperate", ...
+          bool activated = item["activated"]; // true, false, true, true, true, true, true, true, true, true, ...
+
+          if(activated){
+            plant_type = plantType;
+            plant_id = id;
+            Serial.println(plant_type);
+            Serial.println(plant_id);
+          }
+        }
+
+        }
+      } else {
+        Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+      }
+      https.end();
+    } else {
+      Serial.printf("[HTTPS] Unable to connect\n");
+    }
+  }
+
+//  Serial.println("Wait 3s before next round...");
+  delay(3000);
+}
+
 
 void postRequest() {
   // wait for WiFi connection
@@ -83,17 +157,18 @@ void postRequest() {
 }
 
 void loop(){
+  getPlantInfo();
   sendPlantTypeToArduino(plant_type);
-  plant_type = "Tropical";
   Serial.flush();
   // lets get the plant id (Hard coded rn but we need to fetch that also)
-  plant_id = "63115046a16d5cd929a233cc";
+  // plant_id = "63115046a16d5cd929a233cc";
   // lets set sensor data.
   // this is setting moisture and temp values.
   setSensorData();
   // send the post request.
   postRequest();
   Serial.flush();
+  
 }
 
 void sendPlantTypeToArduino(String plant_type){
